@@ -1,4 +1,6 @@
+apache-airflow-providers-google
 pandas==1.5.2
+pmaw
 praw
 protobuf==4.21.11
 pyarrow==10.0.1
