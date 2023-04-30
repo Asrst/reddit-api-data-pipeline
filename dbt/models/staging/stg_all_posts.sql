@@ -28,8 +28,8 @@ select
     cast(created_utc as timestamp) as created_utc,
     -- user info
     author, 
-    ifnull(author_flair_type, 'unknown'),
-    ifnull(author_premium, 'unknown'),
+    ifnull(author_flair_type, 'unknown') as author_flair_type,
+    author_premium,
     -- engagement
     cast(score as numeric) as score,
     cast(upvote_ratio as numeric) as upvote_ratio,
@@ -54,8 +54,8 @@ select
     cast(created_utc as timestamp) as created_utc,
     -- user info
     author, 
-    ifnull(author_flair_type, 'unknown'),
-    ifnull(author_premium, 'unknown'),
+    ifnull(author_flair_type, 'unknown') as author_flair_type,
+    author_premium,
     -- engagement
     cast(score as numeric) as score,
     cast(upvote_ratio as numeric) as upvote_ratio,
@@ -80,8 +80,8 @@ select
     cast(created_utc as timestamp) as created_utc,
     -- user info
     author, 
-    ifnull(author_flair_type, 'unknown'),
-    ifnull(author_premium, 'unknown'),
+    ifnull(author_flair_type, 'unknown') as author_flair_type,
+    author_premium,
     -- engagement
     cast(score as numeric) as score,
     cast(upvote_ratio as numeric) as upvote_ratio,

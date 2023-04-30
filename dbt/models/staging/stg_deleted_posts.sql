@@ -5,6 +5,7 @@ with ipl_subreddit as
   select *, 'ipl' as sub_reddit
   from {{ source('bq_subreddit','ext_ipl') }}
   where author = '[deleted]'
+  and EXTRACT(YEAR FROM created_utc) = 2022
 ),
 
 stranger_things_subreddit as (
@@ -12,6 +13,7 @@ stranger_things_subreddit as (
         'stranger_things' as sub_reddit
     from {{ source('bq_subreddit','ext_stranger_things') }}
     where author = '[deleted]'
+    and EXTRACT(YEAR FROM created_utc) = 2022
 ), 
 
 technology_subreddit as (
@@ -19,6 +21,7 @@ technology_subreddit as (
         'technology' as sub_reddit
     from {{ source('bq_subreddit','ext_technology') }}
     where author = '[deleted]'
+    and EXTRACT(YEAR FROM created_utc) = 2022
 )
 
 select
@@ -28,8 +31,8 @@ select
     cast(created_utc as timestamp) as created_utc,
     -- user info
     author, 
-    ifnull(author_flair_type, 'unknown'),
-    ifnull(author_premium, 'unknown'),
+    ifnull(author_flair_type, 'unknown') as author_flair_type,
+    author_premium,
     -- engagement
     cast(score as numeric) as score,
     cast(upvote_ratio as numeric) as upvote_ratio,
@@ -54,8 +57,8 @@ select
     cast(created_utc as timestamp) as created_utc,
     -- user info
     author, 
-    ifnull(author_flair_type, 'unknown'),
-    ifnull(author_premium, 'unknown'),
+    ifnull(author_flair_type, 'unknown') as author_flair_type,
+    author_premium,
     -- engagement
     cast(score as numeric) as score,
     cast(upvote_ratio as numeric) as upvote_ratio,
@@ -80,8 +83,8 @@ select
     cast(created_utc as timestamp) as created_utc,
     -- user info
     author, 
-    ifnull(author_flair_type, 'unknown'),
-    ifnull(author_premium, 'unknown'),
+    ifnull(author_flair_type, 'unknown') as author_flair_type,
+    author_premium,
     -- engagement
     cast(score as numeric) as score,
     cast(upvote_ratio as numeric) as upvote_ratio,
