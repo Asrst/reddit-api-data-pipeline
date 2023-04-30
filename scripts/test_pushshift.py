@@ -6,6 +6,31 @@ from pmaw import PushshiftAPI
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
+# field names to extract from the API response.
+POST_FIELDS = (
+        "id",
+        "title",
+        "score",
+        "num_comments",
+        "author",
+        "author_flair_type",
+        "author_premium",
+        "created_utc",
+        "url",
+        "upvote_ratio",
+        "over_18",
+        "edited",
+        "spoiler",
+        "stickied",
+        "num_crossposts",
+        "is_crosspostable",
+        "content_categories",
+        "archived",
+        "post_hint",
+        "media",
+        "gilded",
+        "selftext",
+    )
 
 def fetch_data(subreddit, start, end):
     """Extract Data to Pandas DataFrame object"""
@@ -96,30 +121,6 @@ if __name__ == "__main__":
 
     # Variables for extracting data from reddit API (PRAW)
     SUBREDDIT = "technology"
-    POST_FIELDS = (
-        "id",
-        "title",
-        "score",
-        "num_comments",
-        "author",
-        "author_flair_type",
-        "author_premium",
-        "created_utc",
-        "url",
-        "upvote_ratio",
-        "over_18",
-        "edited",
-        "spoiler",
-        "stickied",
-        "num_crossposts",
-        "is_crosspostable",
-        "content_categories",
-        "archived",
-        "post_hint",
-        "media",
-        "gilded",
-        "selftext",
-    )
 
     years = [2022]
     months = list(range(1, 13))
