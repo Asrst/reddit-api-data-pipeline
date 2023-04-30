@@ -2,7 +2,7 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'my_new_project'
+name: 'subreddit_analytics'
 version: '1.0.0'
 config-version: 2
 
@@ -23,7 +23,7 @@ target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
-
+  - "dbt_modules"
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
@@ -32,7 +32,13 @@ clean-targets:         # directories to be removed by `dbt clean`
 # as tables. These settings can be overridden in the individual model files
 # using the `{{ config(...) }}` macro.
 models:
-  my_new_project:
-    # Applies to all files under models/example/
-    example:
-      materialized: view
+  subreddit_analytics:
+    # Applies to all files under models/.../
+    staging:
+        materialized: view
+    marts:
+        materialized: table
+
+vars:
+  post_type_values: ['image', 'video', 'text', 'gallery', 'external_link']
+  payment_type_values: [1, 2, 3, 4, 5, 6]
