@@ -1,0 +1,10 @@
+
+version: 2
+
+models:
+    - name: stg_active_posts
+      description: "A dbt model with active posts from subreddits"
+      columns:
+          - name: post_id
+            description: "unique identifier of the post"
+            tests:

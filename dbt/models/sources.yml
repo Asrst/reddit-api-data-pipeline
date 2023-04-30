@@ -1,0 +1,9 @@
+version: 2
+sources:
+  - name: bq_subreddit
+    database: nyc-taxi-data-pipeline-250123
+    schema: reddit_api
+    tables:
+      - name: ext_ipl
+      - name: ext_stranger_things
+      - name: ext_technology
