@@ -43,8 +43,8 @@ Create a batch data pipeline to ingest Reddit data from its API (for any chosen 
 
 
 #### 3. Setup gcp infra setup using terraform
-- Setup gcp project, enable api's and download the credentials json - refer this ![file](./terraform/gcp_setup.md).
-- Navigate to terraform directory & refer this ![file](./terraform/README.md) for commands to run.
+- Setup gcp project, enable api's and download the credentials json - refer this ![`gcp_setup.md`](./terraform/gcp_setup.md).
+- Navigate to terraform directory & refer the folder ![`terraform`](./terraform/README.md) for commands to run.
     ```shell
     cd terraform
     ```
@@ -62,14 +62,15 @@ Create a batch data pipeline to ingest Reddit data from its API (for any chosen 
 
 **Alternate Option: As the data is small, use python scripts to extract & load the data using python scripts**
 - To extract and store the data to GCS & create big query external tables, run the scripts in `scripts/` folder.
+- Run the commands for different subreddit for which data needs to be collected (gcs bucket & bq dataset will remain same).
 
     ```shell
     # next 2 commands assumes you are in airflow folder, if not run cd command.
     cd airflow
     # extracts data from api & store to gcs
-    python3 ../scripts/test_pushshift.py
+    python3 ../scripts/test_pushshift.py --gcs_bucket="dl-reddit-api-404" --sub_reddit="ipl" --year=2022
     # creates a big query external table
-    python3 ../scripts/test_bq_load.py
+    python3 ../scripts/test_bq_load.py --bq_dataset="reddit_api" --table_name="ext_ipl" --gcs_uri="gs://dl-reddit-api-404/ipl/posts-2022-*.csv"
     ```
 
 
@@ -86,7 +87,7 @@ Create a batch data pipeline to ingest Reddit data from its API (for any chosen 
 - Create datasets from newly created data mart to visualise/report or create dashboards.
 
 **Important Note:** 
-- preset.io (or superset) doesnt allow public dashboard sharing outside of workspace (users needs to be in same workspace for sharing to work). hence this dashboard will be unavailble publicly.
+- preset.io (or superset) doesnt allow public dashboard sharing outside of workspace (users needs to be in same workspace for sharing to work). hence [this dashboard](https://26fa4707.us1a.app.preset.io/superset/dashboard/8/?native_filters_key=px_ojJllrgVakoPASbKWOGpJ7-GnsJxS4Qs4zCrfp89gwTq0anpz7nnuBlCKujI3) is not publicly availble .
 
 
 ### Result/Output:
