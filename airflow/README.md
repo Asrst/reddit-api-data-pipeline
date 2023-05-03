@@ -46,8 +46,8 @@ The `docker-compose.yaml` file used in this project is referenced (with few modi
 The DAG for our data pipeline is present in the `dags/reddit_etl.py` which you can also see in the airflow UI. If you observe this code file, it imports the `run_etl` function from the `api_to_gcs.py` file - which has the python code to fetch the data from Pushshift API and save it to GCS. The pipeline is scheduled for a monthly cadence (ideally in the first week) and fetch the posts from a given sub-reddit for the previous month. Since `limit` is set to `None` in the `fetch_data` function, it should return all posts created in the previous month.
 
 The DAG defined is pretty simple & does following two tasks
-    1. `api_to_gcs_task`: Extracts the Reddit data from API and the saves to the given gcs bucket in CSV format.
-    2. `create_bq_table_task`: Creates a external table in the provided bigquery dataset
+1. `api_to_gcs_task`: Extracts the Reddit data from API and the saves to the given gcs bucket in CSV format.
+2. `create_bq_table_task`: Creates a external table in the provided bigquery dataset
 
 
 
@@ -61,10 +61,10 @@ The DAG defined is pretty simple & does following two tasks
     mkdir -p ./logs ./plugins
     ```
 
-- Set the evironment variables. Replace the values <PROJECT_ID>, <BUCKET>, <BQ_DS> & run the below cmd. This create a `.env` with required env variable details. (refer the `dev.env` sample file in this directory)
+- Set the evironment variables. Replace the values `<PROJECT_ID>`, `<GCS_BUCKET>`, `<BQ_DS>` & run the below cmd. This create a `.env` with required env variable details. (refer the `dev.env` sample file in this directory)
 
     ```shell
-    echo -e "AIRFLOW_UID=$(id -u)\nGCP_PROJECT_ID=<PROJECT_ID>\nGCP_GCS_BUCKET=<BUCKET>\nBIGQUERY_DATASET=<BQ_DS>"> .env
+    echo -e "AIRFLOW_UID=$(id -u)\nGCP_PROJECT_ID=<PROJECT_ID>\nGCP_GCS_BUCKET=<GCS_BUCKET>\nBIGQUERY_DATASET=<BQ_DS>"> .env
     ```
     <!-- `export $(xargs < .env)` -->
 
