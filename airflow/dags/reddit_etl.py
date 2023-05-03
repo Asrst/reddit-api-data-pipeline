@@ -23,7 +23,7 @@ DAG to extract Reddit data, load into AWS S3, and copy to AWS Redshift
 
 # Run our DAG daily and ensures DAG run will kick off
 # once Airflow is started, as it will try to "catch up"
-schedule_interval = "@daily"
+schedule_interval = "@monthly"
 start_date = days_ago(1)
 
 default_args = {"owner": "airflow", 

@@ -64,8 +64,6 @@ x-airflow-common:
     GCP_PROJECT_ID: '${GCP_PROJECT_ID}'
     GCP_GCS_BUCKET: '${GCP_GCS_BUCKET}'
     BIGQUERY_DATASET: '${BIGQUERY_DATASET}'
-    REDDIT_CLIENT_ID: '${REDDIT_CLIENT_ID}'
-    REDDIT_SECRET: '${REDDIT_SECRET}'
       
   volumes:
     - ./dags:/opt/airflow/dags
