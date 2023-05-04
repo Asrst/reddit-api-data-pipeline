@@ -117,6 +117,39 @@ def run_etl(subreddit, bucket_name):
     upload_df_to_gcs(data_df, bucket_name, save_path)
 
 
+def fetch_historical_data(subreddit, bucket_name, year=2022):
+    """Extract Reddit data and load to CSV"""
+
+    end_dates = [parser.parse(f"{year+1}-01-01"),
+                 ]
+    for month in range(12, 1, -1):
+        end_dates.append(parser.parse(f"{year}-{month}-01"))
+    print("number of endates:", len(end_dates))
+
+    for end_date in end_dates:
+        # dt_now = datetime.now()        
+        start_date =  end_date + relativedelta(months=-1)
+        print(f"#start: {start_date}, #end: {end_date}")
+
+        # check for start date & skip if greater than current date.
+        if datetime.now() < start_date:
+            print(f"Data not available yet as provided date is greater than current date.")
+            print("skipping...")
+            continue
+
+        year, month = start_date.year, start_date.month
+        start_epoch = int(start_date.timestamp())
+        end_epoch = int(end_date.timestamp())
+
+        data_df = fetch_data(subreddit, start_epoch, end_epoch)
+        data_df = transform(data_df)
+        print("# of data points: ", data_df.shape)
+
+        save_path = f"{subreddit}/posts-{year}-{month}.csv"
+        upload_df_to_gcs(data_df, bucket_name, save_path)
+
+
+
 if __name__ == "__main__":
     # GCP bucket to store data
     GCP_GCS_BUCKET="dl-reddit-api-404"
@@ -124,12 +157,11 @@ if __name__ == "__main__":
     # Variables for extracting data from reddit API (PRAW)
     SUBREDDIT = "technology"
 
-    years = [2022]
+    year = 2022
     months = list(range(1, 13))
 
-    for year in years:
-        for month in months:
-            year_month = f"{year}-{month}"
-            print("running etl for: ", year_month)
-            run_etl(SUBREDDIT, year_month, GCP_GCS_BUCKET)
-            print("#"*70)
+    for month in months:
+        year_month = f"{year}-{month}"
+        print("running etl for: ", year_month)
+        run_etl(SUBREDDIT, year_month, GCP_GCS_BUCKET)
+        print("#"*70)

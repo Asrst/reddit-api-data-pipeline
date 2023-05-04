@@ -7,7 +7,7 @@ from airflow.providers.google.cloud.operators import bigquery
 from datetime import datetime,timedelta
 import pyarrow as pa
 import os, sys
-from api_to_gcs import run_etl
+from api_to_gcs import fetch_historical_data
 
 
 AIRFLOW_HOME = os.environ.get('AIRFLOW_HOME', '/opt/airflow')
@@ -23,21 +23,21 @@ DAG to extract Reddit data, load into AWS S3, and copy to AWS Redshift
 
 # Run our DAG daily and ensures DAG run will kick off
 # once Airflow is started, as it will try to "catch up"
-schedule_interval = "@monthly"
+schedule_interval = None
 start_date = days_ago(1)
 
 default_args = {"owner": "airflow", 
                 "retries": 1}
 
 with DAG(
-    dag_id="reddit_etl",
+    dag_id="reddit_etl_historical",
     description="Reddit API Data Pipeline",
     schedule_interval=schedule_interval,
     default_args=default_args,
     start_date=start_date,
     catchup=True,
     max_active_runs=1,
-    tags=["RedditEtl"]) as dag:
+    tags=["RedditEtlHistorical"]) as dag:
 
     # extract_data = BashOperator(
     #     task_id="extract",
@@ -48,15 +48,15 @@ with DAG(
     dt_now = datetime.now().strftime("%Y%m%d")
     OUTPUT_FILENAME = f'posts-{dt_now}.csv'
     api_to_gcs_task = PythonOperator(
-        task_id='upload_to_gcs',
-        python_callable = run_etl,
+        task_id='fetch_historical_data',
+        python_callable = fetch_historical_data,
         op_kwargs = {
             'subreddit': SUBREDDIT, 
             'bucket_name' : GCP_GCS_BUCKET,
-            # 'save_path' : f'{SUBREDDIT}/{OUTPUT_FILENAME}'
+            'year':2021
         }
     )
-    api_to_gcs_task.doc_md = "Extract Reddit data and store as CSV in GCS"
+    api_to_gcs_task.doc_md = "Extract Historical Reddit data and store as CSV in GCS"
 
     table_ref = "{}.{}.{}".format(GCP_PROJECT_ID, BIGQUERY_DATASET, SUBREDDIT)
     delete_ext_table_task = bigquery.BigQueryDeleteTableOperator(task_id="delete_external_table_if_exists",

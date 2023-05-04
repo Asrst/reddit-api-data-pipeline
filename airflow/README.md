@@ -14,13 +14,6 @@ The `docker-compose.yaml` file used in this project is referenced (with few modi
 **modifications:**
 
 - Official Airflow docker image under `x-airflow-common` in `docker-compose.yaml` is replaced (lines 48 to 50). I have referenced a external `Dockerfile` which pulls the airflow image, installs the google cloud sdk and python dependencies using pip. These are necessary to run the dags/scripts successfully.
-<br>
-
-~~The line 61 in `docker-compose.yaml`. This installs the specified packages within the Airflow containers. (skip this step, causing permission issues in newer versions). Installing the dependencies in the extended airflow docker in the above step, Refer the `Dockerfile`~~
-
-   <!-- ```yaml
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- praw pmaw configparser psycopg2-binary}
-    ``` -->
 
 - The lines from 62 to 67 in the current `docker-compose.yaml` are either added or modified. These help to setup the required environment varibales in the containers.
 
@@ -44,7 +37,12 @@ The `docker-compose.yaml` file used in this project is referenced (with few modi
 
 #### Understanding the code
 
-The DAG for our data pipeline is present in the `dags/reddit_etl.py` which you can also see in the airflow UI. If you observe this code file, it imports the `run_etl` function from the `api_to_gcs.py` file - which has the python code to fetch the data from Pushshift API and save it to GCS. The pipeline is scheduled for a monthly cadence (ideally in the first week) and fetch the posts from a given sub-reddit for the previous month. Since `limit` is set to `None` in the `fetch_data` function, it should return all posts created in the previous month.
+There are two dags defined, present in `dags/` folder and can also be seen in the airflow UI.
+
+1. `reddit_etl.py` - This DAG exrtacts data for the last month and is scheduled to run on monthly basis. But you can also manually trigger it from UI to test run it.
+2. `reddit_etl_historical.py` - This DAG exrtacts historical data and not scheduled to run. Trigger it manually to extract, save & load 2022 data into gcs, bigquery.
+
+If you observe the `reddit_etl.py` code file, it imports the `run_etl` function from the `api_to_gcs.py` file - which has the python code to fetch the data from Pushshift API and save it to GCS. The pipeline is scheduled for a monthly cadence (ideally in the first week) and fetch the posts from a given sub-reddit for the previous month. Since `limit` is set to `None` in the `fetch_data` function, it should return all posts created in the previous month.
 
 The DAG defined is pretty simple & does following three tasks
 1. `api_to_gcs_task`: Extracts the Reddit data from API and the saves to the given gcs bucket in CSV format.
@@ -52,6 +50,8 @@ The DAG defined is pretty simple & does following three tasks
 3. `create_bq_table_task`: Creates a external table in the provided bigquery dataset.
 
 ![DAG](../static/reddit-etl-dag.png)
+
+Similary, `reddit_etl_historical` takes `year` as input argument and extracts historical data for entire year.
 
 #### Execution steps
 
