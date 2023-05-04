@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: user_metrics
+    description: >
+      Aggregated table with user level metrics. 
+      
+  - name: subreddit_metrics
+    description: >
+      Aggregated table with metrics at subreddit and month level
+    columns:
+      - name: num_posts
+        description: number of monthly unique posts for each subreddit.
+        tests:
+            - not_null:
+                severity: error

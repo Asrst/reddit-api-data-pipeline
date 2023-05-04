@@ -100,9 +100,15 @@ def run_etl(subreddit, year_month, bucket_name):
     """Extract Reddit data and load to CSV"""
 
     year, month = year_month.split("-")
+    # create range of dates.
     start_date = parser.parse(f"{year}-{month}-01")
     end_date = start_date + relativedelta(months=1)
     print(f"#start: {start_date}, #end: {end_date}")
+
+    # check for start date & skip if greater than current date.
+    if datetime.now() < start_date:
+        print(f"Data not available yet as provided date is greater than current date.")
+        sys.exit(1)
 
     start_epoch = int(start_date.timestamp())
     end_epoch = int(end_date.timestamp())
@@ -116,18 +122,27 @@ def run_etl(subreddit, year_month, bucket_name):
 
 
 if __name__ == "__main__":
+
+    import argparse
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-gb", "--gcs_bucket", default="dl-reddit-api-404", 
+                        help="name of the gcs bucket, should already exist")
+    parser.add_argument("-sr", "--sub_reddit", default="technology", 
+                        help="name/id of the sub-reddit to query the data")
+    parser.add_argument("-y", "--year", default=2022,
+                        help="year for which to extract posts, gets data for all months")
+    args = parser.parse_args()
+
     # GCP bucket to store data
-    GCP_GCS_BUCKET="dl-reddit-api-404"
-
+    GCP_GCS_BUCKET = args["gcs_bucket"]
     # Variables for extracting data from reddit API (PRAW)
-    SUBREDDIT = "technology"
-
-    years = [2022]
+    SUBREDDIT = args["sub_reddit"]
+    # year for which data to be queried
+    year = args["year"] 
+    
     months = list(range(1, 13))
-
-    for year in years:
-        for month in months:
-            year_month = f"{year}-{month}"
-            print("running etl for: ", year_month)
-            run_etl(SUBREDDIT, year_month, GCP_GCS_BUCKET)
-            print("#"*70)
+    for month in months:
+        year_month = f"{year}-{month}"
+        print("running etl for: ", year_month)
+        run_etl(SUBREDDIT, year_month, GCP_GCS_BUCKET)
+        print("#"*70)

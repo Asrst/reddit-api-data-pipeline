@@ -1,42 +1,53 @@
 import pandas as pd
 import praw
 import os, sys
+from datetime import datetime
+from pmaw import PushshiftAPI
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
 
-REDDIT_CLIENT_ID = os.environ.get('REDDIT_CLIENT_ID')
-REDDIT_SECRET = os.environ.get('REDDIT_SECRET')
-
-TIME_FILTER = "day"
-LIMIT = None
+# field names to extract from the API response.
 POST_FIELDS = (
-    "id",
-    "title",
-    "score",
-    "num_comments",
-    "author",
-    "created_utc",
-    "url",
-    "upvote_ratio",
-    "over_18",
-    "edited",
-    "spoiler",
-    "stickied",
-)
+        "id",
+        "title",
+        "score",
+        "num_comments",
+        "author",
+        "author_flair_type",
+        "author_premium",
+        "created_utc",
+        "url",
+        "upvote_ratio",
+        "over_18",
+        "edited",
+        "spoiler",
+        "stickied",
+        "num_crossposts",
+        "is_crosspostable",
+        "content_categories",
+        "archived",
+        "post_hint",
+        "media",
+        "gilded",
+        "selftext",
+    )
 
-
-def fetch_data(SUBREDDIT):
+def fetch_data(subreddit, start, end):
     """Extract Data to Pandas DataFrame object"""
-    
-    client = praw.Reddit(
-            client_id=REDDIT_CLIENT_ID, client_secret=REDDIT_SECRET, 
-            user_agent="top-posts-fetcher")
 
+    client = PushshiftAPI()
+    
     post_items = []
     try:
-        subreddit = client.subreddit(SUBREDDIT)
-        posts = subreddit.top(time_filter=TIME_FILTER, limit=LIMIT)
-        for submission in posts:
-            to_dict = vars(submission)
-            sub_dict = {field: to_dict[field] for field in POST_FIELDS}
+        # end date is not inclusive
+        posts = client.search_submissions(subreddit=subreddit, limit=None, 
+                                            since=start, until=end)
+        if len(posts) < 1:
+            return pd.DataFrame()
+
+        for post in posts:
+            # print(post['url'], post['permalink'])
+            sub_dict = {field: post.get(field, None) for field in POST_FIELDS}
             post_items.append(sub_dict)
     except Exception as e:
         print(f"Exception Ocurred:{e}")
@@ -48,9 +59,17 @@ def fetch_data(SUBREDDIT):
 
 def transform(df):
     """Apply basic transformation to the extracted data."""
-
+    
     # Convert epoch to UTC
     df["created_utc"] = pd.to_datetime(df["created_utc"], unit="s")
+    
+    # check for media
+    df["has_media"] = df['media'].apply(lambda x: False if x is None else True)
+    
+    # join if categories are multiple
+    isna = df['content_categories'].isna()
+    df.loc[isna, 'content_categories'] = df.loc[isna, 'content_categories'].apply(lambda x: [])
+    df["content_categories"] = df["content_categories"].apply(",".join)
     
     return df 
 
@@ -77,14 +96,40 @@ def upload_df_to_gcs(df, bucket_name, save_path) -> None:
     return
 
 
-def run_etl(subreddit, bucket_name, save_path):
+def run_etl(subreddit, bucket_name):
     """Extract Reddit data and load to CSV"""
+
+    dt_now = datetime.now()
+    year, month = dt_now.year, dt_now.month
     
-    data_df = fetch_data(subreddit)
+    end_date = parser.parse(f"{year}-{month}-01")
+    start_date =  end_date + relativedelta(months=-1)
+    print(f"#start: {start_date}, #end: {end_date}")
+
+    start_epoch = int(start_date.timestamp())
+    end_epoch = int(end_date.timestamp())
+
+    data_df = fetch_data(subreddit, start_epoch, end_epoch)
     data_df = transform(data_df)
+    print("# of data points: ", data_df.shape)
+
+    save_path = f"{subreddit}/posts-{year}-{month}.csv"
     upload_df_to_gcs(data_df, bucket_name, save_path)
 
 
 if __name__ == "__main__":
-    SUBREDDIT = "ipl"
-    run_etl(SUBREDDIT, 'dl-reddit-api-404', 'reddit_api/raw.csv')
+    # GCP bucket to store data
+    GCP_GCS_BUCKET="dl-reddit-api-404"
+
+    # Variables for extracting data from reddit API (PRAW)
+    SUBREDDIT = "technology"
+
+    years = [2022]
+    months = list(range(1, 13))
+
+    for year in years:
+        for month in months:
+            year_month = f"{year}-{month}"
+            print("running etl for: ", year_month)
+            run_etl(SUBREDDIT, year_month, GCP_GCS_BUCKET)
+            print("#"*70)

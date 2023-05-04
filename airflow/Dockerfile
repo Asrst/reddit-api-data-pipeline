@@ -1,25 +1,14 @@
 # Ref: https://airflow.apache.org/docs/docker-stack/recipes.html
 # First-time build can take upto 10 mins.
 
-FROM apache/airflow:2.2.3
-
-ENV AIRFLOW_HOME=/opt/airflow
-
-USER root
-RUN apt-get update && \
-    ACCEPT_EULA=Y apt-get upgrade -y && \
-    apt-get install -y git
-RUN pip install --upgrade pip
-# git gcc g++ -qqq
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+FROM apache/airflow:2.5.0
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-u", "-x", "-c"]
 
-ARG CLOUD_SDK_VERSION=322.0.0
-ENV GCLOUD_HOME=/home/google-cloud-sdk
+USER root
+
+ARG CLOUD_SDK_VERSION=428.0.0
+ENV GCLOUD_HOME=/opt/google-cloud-sdk
 
 ENV PATH="${GCLOUD_HOME}/bin/:${PATH}"
 
@@ -32,10 +21,16 @@ RUN DOWNLOAD_URL="https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/goo
        --bash-completion=false \
        --path-update=false \
        --usage-reporting=false \
+       --additional-components alpha beta kubectl \
        --quiet \
     && rm -rf "${TMP_DIR}" \
+    && rm -rf "${GCLOUD_HOME}/.install/.backup/" \
     && gcloud --version
 
-WORKDIR $AIRFLOW_HOME
+USER airflow
 
-USER $AIRFLOW_UID
+COPY requirements.txt /
+RUN pip install --no-cache-dir -r /requirements.txt
+
+
+USER ${AIRFLOW_UID}

@@ -66,8 +66,19 @@ def load_from_gcs_to_bq_ext(dataset, table_name, gcs_uri):
 
 
 if __name__ == "__main__":
-    bq_dataset = "reddit_api"
-    table_name = "ext_ipl"
-    gcs_uri = f'gs://dl-reddit-api-404/ipl/posts-2022-*.csv'
+
+    import argparse
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-ds", "--bq_dataset", default="reddit_api", 
+                        help="name of big query dataset, should already exist")
+    parser.add_argument("-tn", "--table_name", default="ext_technology", 
+                        help="name of the table to created in the given dataset")
+    parser.add_argument("-p", "--gcs_uri", default="gs://dl-reddit-api-404/technology/posts-2022-*.csv",
+                        help="gcs uri/path of the files to be loaded as external table")
+    args = parser.parse_args()
+
+    bq_dataset = args["bq_dataset"]
+    table_name = args["table_name"]
+    gcs_uri = args["gcs_uri"]
     load_from_gcs_to_bq_ext(bq_dataset, table_name, gcs_uri)
 
