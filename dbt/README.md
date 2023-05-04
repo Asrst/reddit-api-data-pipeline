@@ -20,7 +20,11 @@ Contains dbt project, with necessary staging & mart models for Reddit API data p
     # builds the models in staging folder
     dbt build --select marts
     ```
-- Make sure they run successfully & Scehdule the runs for this project in dbt cloud (using the UI).
+- Make sure they run successfully & Scehdule the dbt runs for this project in dbt cloud (using the UI).
+
+![dbt-lineage-subreddit-metrics](../static/lineage_subreddit_metrics.PNG)
+
+![dbt-lineage-user-metrics](../static/lineage_user_metrics.PNG)
 
 
 ### Dbt Resources:

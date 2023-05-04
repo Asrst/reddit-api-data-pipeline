@@ -53,7 +53,7 @@ with DAG(
         op_kwargs = {
             'subreddit': SUBREDDIT, 
             'bucket_name' : GCP_GCS_BUCKET,
-            'year':2021
+            'year':2022
         }
     )
     api_to_gcs_task.doc_md = "Extract Historical Reddit data and store as CSV in GCS"
