@@ -56,13 +56,15 @@ Create a batch data pipeline to ingest Reddit data from its API (for any chosen 
 
     mkdir logs plugins
     ```
-- Setup Airflow using docker & docker-compose. Refer ![`airflow`](./airflow/) for detailed steps.
-- Refer the dags in `airflow/dags` which contains code for quering api & loading data into gcs/big-query.
-- The pipeline DAG is scheduled to run on monthly basis. Trigger it manually to test run it.
+- Setup Airflow using docker & docker-compose. Refer ![`airflow`](./airflow/) for detailed steps.Refer the dags in `airflow/dags` which contains code for quering api & loading data into gcs/big-query.
+- In the UI, There will be two dags
+1. `reddit_etl` - This DAG exrtacts data for the last month and is scheduled to run on monthly basis. But you can also manually trigger it from UI to test run it.
+2. `reddit_etl_historical` - This DAG exrtacts historical data and not scheduled to run. Trigger it manually to extract, save & load 2022 data into gcs, bigquery.
 
-**Alternate Option: As the data is small, use python scripts to extract & load the data using python scripts**
-- To extract and store the data to GCS & create big query external tables, run the scripts in `scripts/` folder.
+**Alternative (only to populate historical data): As the data is small, I used python scripts to extract & load the data into gcp **
+- To extract and store the historical data (2022) to GCS & create big query external tables, run the scripts in `scripts/` folder.
 - Run the commands for different subreddit for which data needs to be collected (gcs bucket & bq dataset will remain same).
+- This step can be improved, by moving it into a seperate airflow DAG.
 
     ```shell
     # next 2 commands assumes you are in airflow folder, if not run cd command.
