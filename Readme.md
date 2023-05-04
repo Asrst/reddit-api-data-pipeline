@@ -87,7 +87,7 @@ Create a batch data pipeline to ingest Reddit data from its API (for any chosen 
 - Create datasets from newly created data mart to visualise/report or create dashboards.
 
 **Important Note:** 
-- preset.io (or superset) doesnt allow public dashboard sharing outside of workspace (users needs to be in same workspace for sharing to work). hence [this dashboard](https://26fa4707.us1a.app.preset.io/superset/dashboard/8/?native_filters_key=px_ojJllrgVakoPASbKWOGpJ7-GnsJxS4Qs4zCrfp89gwTq0anpz7nnuBlCKujI3) is not publicly availble .
+- preset.io (or superset) doesnt allow public dashboard sharing outside of workspace (users needs to be in same workspace for sharing to work). hence [this dashboard](https://26fa4707.us1a.app.preset.io/superset/dashboard/8/?native_filters_key=px_ojJllrgVakoPASbKWOGpJ7-GnsJxS4Qs4zCrfp89gwTq0anpz7nnuBlCKujI3) is not publicly availble . Alternatively, I created an identical [Looker Dashboard](https://lookerstudio.google.com/reporting/11d1e179-4257-4929-a024-cbe47d1bfa6f) with public access.
 
 
 ### Result/Output:
