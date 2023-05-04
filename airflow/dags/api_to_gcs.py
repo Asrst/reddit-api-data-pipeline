@@ -99,9 +99,9 @@ def upload_df_to_gcs(df, bucket_name, save_path) -> None:
 def run_etl(subreddit, bucket_name):
     """Extract Reddit data and load to CSV"""
 
-    year, month = year_month.split("-")
+    dt_now = datetime.now()
+    year, month = dt_now.year, dt_now.month
     
-    datetime.now()
     end_date = parser.parse(f"{year}-{month}-01")
     start_date =  end_date + relativedelta(months=-1)
     print(f"#start: {start_date}, #end: {end_date}")
@@ -113,7 +113,7 @@ def run_etl(subreddit, bucket_name):
     data_df = transform(data_df)
     print("# of data points: ", data_df.shape)
 
-    save_path = f"{subreddit}/posts-{year_month}.csv"
+    save_path = f"{subreddit}/posts-{year}-{month}.csv"
     upload_df_to_gcs(data_df, bucket_name, save_path)
 
 

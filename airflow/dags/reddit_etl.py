@@ -57,9 +57,21 @@ with DAG(
         }
     )
     api_to_gcs_task.doc_md = "Extract Reddit data and store as CSV in GCS"
+
+    table_ref = "{}.{}.{}".format(GCP_PROJECT_ID, BIGQUERY_DATASET, SUBREDDIT)
+    delete_ext_table_task = bigquery.BigQueryDeleteTableOperator(task_id="delete_external_table_if_exists",
+                            deletion_dataset_table=table_ref,
+                            ignore_if_missing=True)
     
     create_bq_table_task = bigquery.BigQueryCreateExternalTableOperator(
-                                task_id = f'create_ext_bq_table',
+                                    task_id = f'create_ext_bq_table',
+                                    # bucket=GCP_GCS_BUCKET,
+                                    # source_objects=[f'{SUBREDDIT}/*.csv'],
+                                    # destination_project_dataset_table=table_ref,
+                                    # source_format='CSV',
+                                    # autodetect=True,
+                                    # allow_quoted_newlines=True
+
                                 table_resource = {
                                     'tableReference': {
                                     'projectId': GCP_PROJECT_ID,
@@ -70,9 +82,10 @@ with DAG(
                                         'sourceFormat': 'CSV',
                                         'autodetect': True,
                                         'sourceUris': [f'gs://{GCP_GCS_BUCKET}/{SUBREDDIT}/*.csv'],
+                                          "csvOptions": {'allowQuotedNewlines':True},
                                     },
                                 }
     )
     create_bq_table_task.doc_md = "Copy CSV from to GCS to Bigquery table"
 
-api_to_gcs_task >> create_bq_table_task
+api_to_gcs_task >> delete_ext_table_task >> create_bq_table_task

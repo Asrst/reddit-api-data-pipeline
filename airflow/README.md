@@ -13,13 +13,14 @@ The `docker-compose.yaml` file used in this project is referenced (with few modi
 
 **modifications:**
 
-- Official Airflow docker image under `x-airflow-common` in `docker-compose.yaml` is replaced (lines 48 to 50). I have referenced a external file which pulls the airflow image and also installs the google cloud sdk. This is necessary to run the scripts successfully.
+- Official Airflow docker image under `x-airflow-common` in `docker-compose.yaml` is replaced (lines 48 to 50). I have referenced a external `Dockerfile` which pulls the airflow image, installs the google cloud sdk and python dependencies using pip. These are necessary to run the dags/scripts successfully.
+<br>
 
-- The line 61 in `docker-compose.yaml`. This installs the specified packages within the Airflow containers.
+~~The line 61 in `docker-compose.yaml`. This installs the specified packages within the Airflow containers. (skip this step, causing permission issues in newer versions). Installing the dependencies in the extended airflow docker in the above step, Refer the `Dockerfile`~~
 
-    ```yaml
+   <!-- ```yaml
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- praw pmaw configparser psycopg2-binary}
-    ```
+    ``` -->
 
 - The lines from 62 to 67 in the current `docker-compose.yaml` are either added or modified. These help to setup the required environment varibales in the containers.
 
@@ -45,11 +46,12 @@ The `docker-compose.yaml` file used in this project is referenced (with few modi
 
 The DAG for our data pipeline is present in the `dags/reddit_etl.py` which you can also see in the airflow UI. If you observe this code file, it imports the `run_etl` function from the `api_to_gcs.py` file - which has the python code to fetch the data from Pushshift API and save it to GCS. The pipeline is scheduled for a monthly cadence (ideally in the first week) and fetch the posts from a given sub-reddit for the previous month. Since `limit` is set to `None` in the `fetch_data` function, it should return all posts created in the previous month.
 
-The DAG defined is pretty simple & does following two tasks
+The DAG defined is pretty simple & does following three tasks
 1. `api_to_gcs_task`: Extracts the Reddit data from API and the saves to the given gcs bucket in CSV format.
-2. `create_bq_table_task`: Creates a external table in the provided bigquery dataset
+2. `delete_ext_table_task`: Deletes the external table definition or view if already exists.
+3. `create_bq_table_task`: Creates a external table in the provided bigquery dataset.
 
-
+![DAG](../static/reddit-etl-dag.png)
 
 #### Execution steps
 
@@ -64,11 +66,12 @@ The DAG defined is pretty simple & does following two tasks
 - Set the evironment variables. Replace the values `<PROJECT_ID>`, `<GCS_BUCKET>`, `<BQ_DS>` & run the below cmd. This create a `.env` with required env variable details. (refer the `dev.env` sample file in this directory)
 
     ```shell
-    echo -e "AIRFLOW_UID=$(id -u)\nGCP_PROJECT_ID=<PROJECT_ID>\nGCP_GCS_BUCKET=<GCS_BUCKET>\nBIGQUERY_DATASET=<BQ_DS>"> .env
+    echo -e "AIRFLOW_UID=50000\nGCP_PROJECT_ID=<PROJECT_ID>\nGCP_GCS_BUCKET=<GCS_BUCKET>\nBIGQUERY_DATASET=<BQ_DS>"> .env
     ```
     <!-- `export $(xargs < .env)` -->
 
 - Run the below commands to start the airflow (runs in detached mode). If commands run succesfully, visiting http://localhost:8080 in a browser should open airflow UI. If nothing shows up, give it a few more minutes & try again. Password and username are both `airflow`. For understanding the UI, can refer official [docs](https://airflow.apache.org/docs/apache-airflow/stable/ui.html).
+
 
     ```shell
     echo "builiding the images...This might take a while to complete..."
@@ -100,3 +103,5 @@ The DAG defined is pretty simple & does following two tasks
     ```bash
     docker-compose down --volumes --rmi all
     ```
+- As the containers are running under airflow user, your local user will loose permission to the `dags/` directory & will not be able to edit them. you can run this command (from inside airflow directory) to get them back after shutting down the docker containers.
+    `sudo chown <user>:<user> -R ../airflow`
