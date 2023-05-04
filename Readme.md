@@ -78,7 +78,7 @@ Create a batch data pipeline to ingest Reddit data from its API (for any chosen 
 - Fork this repo into your git account & Login into your dbt cloud account.
 - Setup new project by providing link your newly forked git repo & gcp creditional json (if not already done).
 - Transform data using dbt & Create a data mart. Refer ![`dbt`](./dbt/) for detailed steps.
-- Schedule the runs on monthly basis to update the datamarts regularly (as pipeline also runs montly)
+- Schedule the runs on monthly basis to update the datamarts regularly (as airflow pipeline also runs monthly)
 
 *Alternatively you can run the dbt commands in the local, but wont be able to scheduled runs without an Orchestrator*
 
